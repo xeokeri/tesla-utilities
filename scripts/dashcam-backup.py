@@ -49,7 +49,17 @@ class DashcamBackup:
                 if entry.is_file():
                     shutil.copy(entry.path, destination_path)
                 if entry.is_dir():
-                    shutil.copytree(entry.path, destination_path)
+                    next_destination_sub_directory = f"{destination_path}/{entry.name}"
+
+                    if not os.path.exists(next_destination_sub_directory):
+                        os.mkdir(next_destination_sub_directory)
+
+                    for sub_entry in os.scandir(entry.path):
+                        if sub_entry.is_file():
+                            shutil.copy(sub_entry.path, next_destination_sub_directory)
+                        else:
+                            if self.verbose:
+                                print(f"Depth not supported for: {sub_entry.path}")
                 else:
                     if self.verbose:
                         print(f"Unknown entry type: {entry}")
@@ -117,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--verbose", "-v", help="Verbose additional info. Default, disabled.", action="store_true")
     args = parser.parse_args()
 
-    system_mount: str = None
+    system_mount: str
     destination: str = args.destination
     verbose: bool = args.verbose if args.verbose is not None else False
     should_display_list: bool = args.list_only if args.list_only is not None else False
