@@ -18,6 +18,8 @@ Example: "/Volumes/TESLADRIVE", "/Volumes/TESLADRIVE 1", "/Volumes/TESLADRIVE 2"
 
 -d, --destination = Destination to the backup drive, where the videos from the Tesla USB drives will be stored.
 
+-l, --list-only = List the contents that are pending to be backed up. Will no copy when this flag is added.
+
 -v, --verbose = Verbose output turned to 11, if present. Default: off.
 
 -h, --help = Show help message.
