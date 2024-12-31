@@ -43,7 +43,7 @@ class DashcamBackup:
             if self.verbose:
                 print(f"Processing {sub_directory} from {self.source} to {self.destination}")
 
-            number_of_entries_copied: int = 0
+            number_of_entries_copied = 0
 
             for entry in os.scandir(source_path):
                 if entry.is_file():
@@ -62,7 +62,31 @@ class DashcamBackup:
             if self.verbose:
                 print(f"Processed {number_of_entries_copied} entries from {source_path} to {destination_path}")
 
-    def __make_directory_if_not_exist(self, path: str, not_exist_message: str = None, creation_message: str = None):
+    def list_contents(self):
+        root_directory = self.__root_directory()
+
+        for sub_directory in self.__sub_directories():
+            sub_path = f"{root_directory}/{sub_directory}"
+            source_path = f"{self.source}/{sub_path}"
+
+            self.__list_contents(source_path, level=1)
+
+    def __list_contents(self, location: str, level: int = 0):
+        log_prefix = f"{(' ' * 2) * level}"
+
+        print(f"\n{log_prefix}Listing contents of {location}\n")
+
+        for entry in os.scandir(location):
+            entry_name = f"{log_prefix}{entry.name}"
+
+            if entry.is_file() and entry.name.endswith(".mp4"):
+                print(f"{entry_name} (File)")
+            if entry.is_dir():
+                print(f"{entry_name} (Directory)")
+
+                self.__list_contents(entry.path, level + 1)
+
+    def __make_directory_if_not_exist(self, path: str, not_exist_message: str, creation_message: str):
         if not os.path.exists(path):
             if not_exist_message is not None:
                 print(not_exist_message)
@@ -88,6 +112,7 @@ class DashcamBackup:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Backup Tesla Dashcam")
+    parser.add_argument("--list-only", "-l", help="List devices and directories pending copy from source device(s).", action="store_true")
     parser.add_argument("--destination", "-d", help="Destination directory.")
     parser.add_argument("--verbose", "-v", help="Verbose additional info. Default, disabled.", action="store_true")
     args = parser.parse_args()
@@ -95,6 +120,7 @@ if __name__ == "__main__":
     system_mount: str = None
     destination: str = args.destination
     verbose: bool = args.verbose if args.verbose is not None else False
+    should_display_list: bool = args.list_only if args.list_only is not None else False
 
     if destination is None:
         print("Destination is required")
@@ -128,8 +154,14 @@ if __name__ == "__main__":
         ]
 
         for source_directory in source_directories:
-            print(f"Directory: {source_directory} is a Tesla Drive")
+            absolute_path = source_directory.absolute().as_posix()
+            dashcam = DashcamBackup(source=absolute_path, destination=destination, verbose=verbose)
+
+            print(f"Checking directory: {absolute_path}")
+            print(f"Directory: {absolute_path} is a Tesla Drive")
             print(f"Destination: {destination} is the backup destination")
 
-            dashcam = DashcamBackup(source=source_directory, destination=destination, verbose=verbose)
-            dashcam.run()
+            if should_display_list:
+                dashcam.list_contents()
+            else:
+                dashcam.run()
