@@ -8,9 +8,9 @@ __copyright__   = "Copyright © 2024, Xeon Xai"
 __credits__     = ["Xeon Xai"]
 __maintainer__  = "Xeon Xai"
 __description__ = "Backup Tesla DashCam to a backup drive."
-__date__        = "2024-01-01"
+__date__        = "2024-12-31"
 __license__     = "BSD 3-Clause License"
-__version__     = "1.0.0"
+__version__     = "1.0.2"
 
 import os, platform, shutil
 import argparse
